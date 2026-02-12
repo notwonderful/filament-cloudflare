@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace notwonderful\FilamentCloudflare\Concerns;
+
+trait FormatsBytes
+{
+    protected function formatBytes(int|float $bytes, int $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= 1024 ** $pow;
+
+        return round($bytes, $precision) . ' ' . $units[(int) $pow];
+    }
+}

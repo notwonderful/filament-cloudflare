@@ -1,0 +1,65 @@
+{
+    "name": "notwonderful/filament-cloudflare",
+    "description": "Cloudflare management plugin for Filament PHP - Manage Cloudflare settings, firewall, cache, and analytics directly from your Filament admin panel",
+    "keywords": [
+        "filament",
+        "filament-plugin",
+        "cloudflare",
+        "cdn",
+        "firewall",
+        "cache",
+        "analytics"
+    ],
+    "homepage": "https://github.com/notwonderful/filament-cloudflare",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "notwonderful",
+            "email": "ratatatata322@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^5.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "illuminate/support": "^11.28|^12.0",
+        "livewire/livewire": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "notwonderful\\FilamentCloudflare\\": "src/"
+        }
+    },
+    "extra": {
+        "filament": {
+            "plugins": [
+                "notwonderful\\FilamentCloudflare\\CloudflarePlugin"
+            ]
+        },
+        "laravel": {
+            "providers": [
+                "notwonderful\\FilamentCloudflare\\CloudflareServiceProvider"
+            ],
+            "aliases": {
+                "Cloudflare": "notwonderful\\FilamentCloudflare\\Facades\\Cloudflare"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "mockery/mockery": "^1.6.10",
+        "orchestra/testbench": "^10.0|^11.0|^12.0",
+        "phpunit/phpunit": "^11.5.3"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

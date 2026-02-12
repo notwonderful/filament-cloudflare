@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+
+    paths:
+        - src/
+
+    ignoreErrors:
+        - identifier: argument.templateType
+        -
+            identifier: missingType.generics
+            path: src/Resources/Pages/ApiListRecords.php

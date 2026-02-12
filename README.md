@@ -1,13 +1,14 @@
+<div align="center">
+
 # Filament Cloudflare
+
+![PHP Version](https://img.shields.io/badge/PHP-8.3%2B-blue?style=for-the-badge&logo=php)
+![Filament Version](https://img.shields.io/badge/Filament-4.0%20%7C%205.0-FF2D20?style=for-the-badge&logo=filament)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 Manage Cloudflare settings, firewall rules, cache, page rules, analytics, access apps, and edge caching directly from your Filament admin panel.
 
-## Requirements
-
-- PHP 8.3+
-- Laravel 11.28+ or 12.x
-- Filament 5.0+
-- A Cloudflare account with at least one zone
+</div>
 
 ## Installation
 
@@ -115,193 +116,6 @@ public function panel(Panel $panel): Panel
 - [ ] Waiting Room
 - [ ] Bot Management
 
-## API Usage
-
-The package exposes a `Cloudflare` facade with lazy-loaded service accessors. Each service corresponds to a Cloudflare API area.
-
-```php
-use notwonderful\FilamentCloudflare\Facades\Cloudflare;
-```
-
-### Zone
-
-```php
-// List all zones on the account
-$zones = Cloudflare::zone()->listZones();
-
-// Get current zone settings
-$settings = Cloudflare::zone()->getZoneSettings();
-
-// Update a single setting
-Cloudflare::zone()->updateZoneSetting('ssl', 'full');
-
-// Batch update multiple settings
-Cloudflare::zone()->updateZoneSettings([
-    'ssl' => 'full',
-    'security_level' => 'medium',
-]);
-```
-
-### Cache
-
-```php
-// Purge everything
-Cloudflare::cache()->purgeCache(purgeEverything: true);
-
-// Purge specific files
-Cloudflare::cache()->purgeCache(
-    purgeEverything: false,
-    files: ['https://example.com/style.css', 'https://example.com/app.js'],
-);
-
-// Purge by tags or hosts
-Cloudflare::cache()->purgeCache(
-    purgeEverything: false,
-    tags: ['static-assets'],
-    hosts: ['cdn.example.com'],
-);
-```
-
-### Firewall
-
-```php
-use notwonderful\FilamentCloudflare\Enums\FirewallMode;
-
-// List access rules
-$rules = Cloudflare::firewall()->getFirewallAccessRules(page: 1, perPage: 50);
-
-// Block an IP
-Cloudflare::firewall()->createFirewallAccessRule(
-    mode: FirewallMode::Block,
-    configuration: ['target' => 'ip', 'value' => '203.0.113.1'],
-    notes: 'Suspicious activity',
-);
-
-// Delete a rule
-Cloudflare::firewall()->deleteFirewallAccessRule('rule-id');
-
-// User agent rules (returns CloudflarePaginatedResult)
-$result = Cloudflare::firewall()->getFirewallUserAgentRules();
-$result->totalCount();   // total items
-$result->totalPages();   // total pages
-$result->isEmpty();      // bool
-
-// Create a user agent rule
-Cloudflare::firewall()->createFirewallUserAgentRule(
-    userAgent: 'BadBot/1.0',
-    mode: FirewallMode::Block,
-    description: 'Block bad bot',
-);
-```
-
-### Cache Rules
-
-```php
-// List cache rules (Rulesets API)
-$ruleset = Cloudflare::cacheRules()->getCacheRules();
-
-// Create a cache rule
-Cloudflare::cacheRules()->createCacheRule(
-    description: 'Cache API responses',
-    expression: '(http.request.uri.path matches "^/api/public/")',
-    actionParameters: [
-        'cache' => true,
-        'edge_ttl' => ['default' => 3600, 'mode' => 'override_origin'],
-    ],
-);
-
-// Update / delete
-Cloudflare::cacheRules()->updateCacheRule($rulesetId, $ruleId, ...);
-Cloudflare::cacheRules()->deleteCacheRule($rulesetId, $ruleId);
-```
-
-### Page Rules
-
-```php
-use notwonderful\FilamentCloudflare\DataTransferObjects\PageRuleData;
-use notwonderful\FilamentCloudflare\Enums\PageRuleStatus;
-
-// List page rules
-$rules = Cloudflare::pageRules()->getPageRules();
-
-// Create via DTO
-$dto = new PageRuleData(
-    target: 'example.com/images/*',
-    actions: [['id' => 'cache_level', 'value' => 'cache_everything']],
-    priority: 1,
-    status: PageRuleStatus::Active,
-);
-Cloudflare::pageRules()->createPageRule($dto);
-```
-
-### Analytics
-
-Analytics data is fetched via the Cloudflare GraphQL API.
-
-```php
-// Zone analytics for the last 7 days
-$data = Cloudflare::analytics()->getGraphQLAnalytics(days: 7);
-
-// Captcha solve rate for a specific rule
-$data = Cloudflare::analytics()->getGraphQLCaptchaSolveRate(ruleId: 'abc123', days: 30);
-
-// Rule activity
-$data = Cloudflare::analytics()->getGraphQLRuleActivity(ruleId: 'abc123', days: 7);
-```
-
-### Access
-
-```php
-// List access apps, groups, identity providers
-$apps   = Cloudflare::access()->getAccessApps();
-$groups = Cloudflare::access()->getAccessGroups();
-$idps   = Cloudflare::access()->getAccessIdentityProviders();
-
-// Create an access app to protect /admin
-Cloudflare::access()->createAdminAccessApp(type: 'admin');
-
-// Delete an access app
-Cloudflare::access()->deleteAccessApp('app-id');
-```
-
-### Edge Caching
-
-High-level helpers that create/remove cache rules under the hood.
-
-```php
-// Cache guest pages (no laravel_session cookie) for 1 hour
-Cloudflare::edgeCaching()->enableGuestCache(seconds: 3600);
-Cloudflare::edgeCaching()->isGuestCacheEnabled(); // true
-Cloudflare::edgeCaching()->disableGuestCache();
-
-// Cache media files in /storage for 1 day
-Cloudflare::edgeCaching()->enableMediaCache(seconds: 86400);
-Cloudflare::edgeCaching()->disableMediaCache();
-```
-
-## Configuration
-
-Published to `config/cloudflare.php`:
-
-```php
-return [
-    // Auth — .env takes priority, DB settings are fallback
-    'email'      => env('CLOUDFLARE_EMAIL'),
-    'api_key'    => env('CLOUDFLARE_API_KEY'),
-    'token'      => env('CLOUDFLARE_TOKEN'),
-    'zone_id'    => env('CLOUDFLARE_ZONE_ID'),
-    'account_id' => env('CLOUDFLARE_ACCOUNT_ID'),
-
-    // API response caching (0 = disabled)
-    'cache' => [
-        'ttl'    => (int) env('CLOUDFLARE_CACHE_TTL', 300), // seconds
-        'prefix' => 'cloudflare',
-    ],
-];
-```
-
-The cache uses version-based invalidation — when data is mutated through the plugin, the relevant cache group is automatically invalidated. This works with all Laravel cache drivers.
-
 ## API Token Permissions
 
 When creating a Cloudflare API Token, assign these permissions:
@@ -318,31 +132,6 @@ When creating a Cloudflare API Token, assign these permissions:
 
 For read-only analytics, no additional permissions are needed beyond Zone Read (GraphQL API uses the same token).
 
-## Architecture
-
-```
-Cloudflare (facade)
-  -> Cloudflare (service locator, lazy init)
-       -> CloudflareZoneService
-       -> CloudflareCacheService
-       -> CloudflareFirewallService
-       -> CloudflareCacheRulesService
-       -> CloudflarePageRulesService
-       -> CloudflareAnalyticsService -> CloudflareGraphQLService
-       -> CloudflareAccessService
-       -> CloudflareEdgeCachingService -> CloudflareCacheRulesService
-```
-
-Key design decisions:
-
-- **Contracts** — `CloudflareClientInterface`, `CloudflareSettingsInterface`, `CloudflareAuthInterface` for testability
-- **Retry middleware** — `CloudflareClient` retries on 429 and 5xx with exponential backoff
-- **CloudflareResponse** — wraps PSR-7 responses with `throwIfFailed()`, `getResult()`, `getResultInfo()`
-- **CloudflarePaginatedResult** — DTO for paginated endpoints with `totalPages()`, `totalCount()`, `isEmpty()`
-- **DTOs and Enums** — `FirewallRuleData`, `PageRuleData`, `ZoneSettingsData`, plus 8 enums for type safety
-- **Typed exceptions** — `CloudflareApiException`, `CloudflareConfigurationException`, `CloudflareRequestException`
-- **Version-based cache** — `CloudflareBaseService::remember()` with cache key versioning; `invalidateCache()` bumps version
-
 ## Cloudflare API Deprecation Notes
 
 Some endpoints used by this plugin are deprecated by Cloudflare:
@@ -354,29 +143,6 @@ Some endpoints used by this plugin are deprecated by Cloudflare:
 | Page Rules | `pagerules` | Deprecated, being replaced by Redirect Rules / Cache Rules |
 
 These features continue to work. Future versions of this plugin may migrate to their replacements.
-
-## Testing
-
-The package has 115 tests with 186 assertions covering all services, the HTTP client, response handling, authentication, and settings.
-
-```bash
-# Run tests
-vendor/bin/phpunit
-
-# Run static analysis (Larastan level 8)
-vendor/bin/phpstan analyse
-```
-
-## CI
-
-GitHub Actions runs on every push and PR:
-
-- PHPUnit on PHP 8.3 and 8.4
-- Larastan level 8 (zero errors)
-
-## License
-
-MIT. See [LICENSE.md](LICENSE.md).
 
 ## Credits
 

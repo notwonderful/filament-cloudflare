@@ -48,7 +48,7 @@ class CloudflareEdgeCachingServiceTest extends TestCase
 
     private function guestExpression(): string
     {
-        return '(not http.cookie contains "laravel_session=" and not http.cookie contains "XSRF-TOKEN=" and http.request.method eq "GET" and http.request.uri.path matches "^[^?]*$")';
+        return '(not http.cookie contains "laravel_session=" and not http.cookie contains "XSRF-TOKEN=" and http.request.method eq "GET" and http.request.uri.query eq "")';
     }
 
     // --- enableGuestCache ---

@@ -11,7 +11,7 @@ use notwonderful\FilamentCloudflare\Services\CacheRules\CloudflareCacheRulesServ
 
 class CloudflareEdgeCachingService extends CloudflareBaseService
 {
-    private const string GUEST_EXPRESSION = '(not http.cookie contains "laravel_session=" and not http.cookie contains "XSRF-TOKEN=" and http.request.method eq "GET" and http.request.uri.path matches "^[^?]*$")';
+    private const string GUEST_EXPRESSION = '(not http.cookie contains "laravel_session=" and not http.cookie contains "XSRF-TOKEN=" and http.request.method eq "GET" and http.request.uri.query eq "")';
 
     private const string MEDIA_EXTENSIONS = '.jpg") or ends_with(http.request.uri.path, ".jpeg") or ends_with(http.request.uri.path, ".png") or ends_with(http.request.uri.path, ".gif") or ends_with(http.request.uri.path, ".webp") or ends_with(http.request.uri.path, ".svg") or ends_with(http.request.uri.path, ".mp4") or ends_with(http.request.uri.path, ".webm") or ends_with(http.request.uri.path, ".mp3") or ends_with(http.request.uri.path, ".ogg") or ends_with(http.request.uri.path, ".wav")';
 

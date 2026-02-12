@@ -25,38 +25,52 @@ class CloudflareEdgeCaching extends Page
     protected static ?int $navigationSort = 7;
     protected string $view = 'filament-cloudflare::pages.cloudflare-edge-caching';
 
+    /** @var array<string, mixed>|null */
+    public ?array $data = [];
+
     public ?bool $guestCacheEnabled = false;
     public ?int $guestCacheSeconds = 3600;
     public ?bool $mediaCacheEnabled = false;
     public ?int $mediaCacheSeconds = 86400;
     public ?string $mediaPathPrefix = '/storage';
 
-    protected function getGuestCacheStatus(): bool
-    {
-        try {
-            return Cloudflare::edgeCaching()->isGuestCacheEnabled();
-        } catch (\Throwable $e) {
-            return false;
-        }
-    }
-
-    protected function getMediaCacheStatus(): bool
-    {
-        try {
-            return Cloudflare::edgeCaching()->isMediaCacheEnabled();
-        } catch (\Throwable $e) {
-            return false;
-        }
-    }
-
     public function getTitle(): string
     {
         return 'Edge Caching';
     }
 
+    public function mount(): void
+    {
+        $this->loadCurrentState();
+
+        $this->form->fill([
+            'guest_cache_enabled' => $this->guestCacheEnabled,
+            'guest_cache_seconds' => $this->guestCacheSeconds,
+            'media_cache_enabled' => $this->mediaCacheEnabled,
+            'media_cache_seconds' => $this->mediaCacheSeconds,
+            'media_path_prefix' => $this->mediaPathPrefix,
+        ]);
+    }
+
+    protected function loadCurrentState(): void
+    {
+        try {
+            $this->guestCacheEnabled = Cloudflare::edgeCaching()->isGuestCacheEnabled();
+        } catch (\Throwable $e) {
+            $this->guestCacheEnabled = false;
+        }
+
+        try {
+            $this->mediaCacheEnabled = Cloudflare::edgeCaching()->isMediaCacheEnabled();
+        } catch (\Throwable $e) {
+            $this->mediaCacheEnabled = false;
+        }
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->statePath('data')
             ->schema([
                 Section::make('Guest Page Caching')
                     ->description('Cache HTML pages for guests (users without session cookies) at Cloudflare edge locations')
@@ -64,14 +78,12 @@ class CloudflareEdgeCaching extends Page
                         Forms\Components\Toggle::make('guest_cache_enabled')
                             ->label('Enable Guest Page Caching')
                             ->live()
-                            ->default(fn () => $this->getGuestCacheStatus())
                             ->helperText('Cache pages for users who are not logged in'),
 
                         Forms\Components\TextInput::make('guest_cache_seconds')
                             ->label('Cache Duration (seconds)')
                             ->numeric()
                             ->required()
-                            ->default(fn () => $this->guestCacheSeconds)
                             ->helperText('How long to cache pages (e.g., 3600 = 1 hour, 86400 = 1 day)')
                             ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('guest_cache_enabled')),
                     ]),
@@ -82,20 +94,17 @@ class CloudflareEdgeCaching extends Page
                         Forms\Components\Toggle::make('media_cache_enabled')
                             ->label('Enable Media Caching')
                             ->live()
-                            ->default(fn () => $this->getMediaCacheStatus())
                             ->helperText('Cache media attachments (images, videos, audio)'),
 
                         Forms\Components\TextInput::make('media_cache_seconds')
                             ->label('Cache Duration (seconds)')
                             ->numeric()
                             ->required()
-                            ->default(fn () => $this->mediaCacheSeconds)
                             ->helperText('How long to cache media files (e.g., 86400 = 1 day, 604800 = 1 week)')
                             ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('media_cache_enabled')),
 
                         Forms\Components\TextInput::make('media_path_prefix')
                             ->label('Media Path Prefix')
-                            ->default(fn () => $this->mediaPathPrefix)
                             ->helperText('Path prefix for media files (e.g., /storage, /uploads)')
                             ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('media_cache_enabled')),
                     ]),
@@ -117,52 +126,50 @@ class CloudflareEdgeCaching extends Page
         $data = $this->form->getState();
 
         try {
-            // Handle guest cache
-            if ($data['guest_cache_enabled'] ?? false) {
+            $wantGuestCache = (bool) ($data['guest_cache_enabled'] ?? false);
+            $wantMediaCache = (bool) ($data['media_cache_enabled'] ?? false);
+
+            if ($wantGuestCache) {
                 if ($this->guestCacheEnabled) {
-                    // Already enabled, update if needed
                     Cloudflare::edgeCaching()->disableGuestCache();
                 }
                 Cloudflare::edgeCaching()->enableGuestCache((int) ($data['guest_cache_seconds'] ?? 3600));
-            } else {
-                if ($this->guestCacheEnabled) {
-                    Cloudflare::edgeCaching()->disableGuestCache();
-                }
+            } elseif ($this->guestCacheEnabled) {
+                Cloudflare::edgeCaching()->disableGuestCache();
             }
 
-            // Handle media cache
-            if ($data['media_cache_enabled'] ?? false) {
+            $mediaPrefix = $data['media_path_prefix'] ?? '/storage';
+
+            if ($wantMediaCache) {
                 if ($this->mediaCacheEnabled) {
-                    // Already enabled, update if needed
-                    Cloudflare::edgeCaching()->disableMediaCache();
+                    Cloudflare::edgeCaching()->disableMediaCache(mediaPathPrefix: $mediaPrefix);
                 }
                 Cloudflare::edgeCaching()->enableMediaCache(
                     (int) ($data['media_cache_seconds'] ?? 86400),
-                    null,
-                    $data['media_path_prefix'] ?? '/storage'
+                    mediaPathPrefix: $mediaPrefix,
                 );
-            } else {
-                if ($this->mediaCacheEnabled) {
-                    Cloudflare::edgeCaching()->disableMediaCache();
-                }
+            } elseif ($this->mediaCacheEnabled) {
+                Cloudflare::edgeCaching()->disableMediaCache(mediaPathPrefix: $mediaPrefix);
             }
+
+            $this->loadCurrentState();
+
+            $this->guestCacheSeconds = (int) ($data['guest_cache_seconds'] ?? $this->guestCacheSeconds);
+            $this->mediaCacheSeconds = (int) ($data['media_cache_seconds'] ?? $this->mediaCacheSeconds);
+            $this->mediaPathPrefix = $mediaPrefix;
+
+            $this->form->fill([
+                'guest_cache_enabled' => $this->guestCacheEnabled,
+                'guest_cache_seconds' => $this->guestCacheSeconds,
+                'media_cache_enabled' => $this->mediaCacheEnabled,
+                'media_cache_seconds' => $this->mediaCacheSeconds,
+                'media_path_prefix' => $this->mediaPathPrefix,
+            ]);
 
             Notification::make()
                 ->title('Edge Caching settings saved successfully')
                 ->success()
                 ->send();
-
-            // Refresh status
-            $this->guestCacheEnabled = Cloudflare::edgeCaching()->isGuestCacheEnabled();
-            $this->mediaCacheEnabled = Cloudflare::edgeCaching()->isMediaCacheEnabled();
-            
-            $this->form->fill([
-                'guest_cache_enabled' => $this->guestCacheEnabled,
-                'guest_cache_seconds' => $data['guest_cache_seconds'] ?? $this->guestCacheSeconds,
-                'media_cache_enabled' => $this->mediaCacheEnabled,
-                'media_cache_seconds' => $data['media_cache_seconds'] ?? $this->mediaCacheSeconds,
-                'media_path_prefix' => $data['media_path_prefix'] ?? $this->mediaPathPrefix,
-            ]);
         } catch (CloudflareApiException $e) {
             Notification::make()
                 ->title('Cloudflare API Error')

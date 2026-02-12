@@ -49,24 +49,24 @@ class CloudflareFirewallResource extends Resource
 
                         Forms\Components\TextInput::make('ip')
                             ->label('IP Address')
-                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Ip->value)
-                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Ip->value)
-                            ->saved(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Ip->value),
+                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Ip)
+                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Ip)
+                            ->dehydrated(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Ip),
 
                         Forms\Components\TextInput::make('ip_range')
                             ->label('IP Range (CIDR)')
                             ->placeholder('192.168.1.0/24')
-                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::IpRange->value)
-                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::IpRange->value)
-                            ->saved(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::IpRange->value),
+                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::IpRange)
+                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::IpRange)
+                            ->dehydrated(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::IpRange),
 
                         Forms\Components\Select::make('country')
                             ->label('Country')
                             ->options(self::getCountries())
                             ->searchable()
-                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Country->value)
-                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Country->value)
-                            ->saved(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Country->value),
+                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Country)
+                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Country)
+                            ->dehydrated(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('configuration_type') === FirewallConfigurationType::Country),
 
                         Forms\Components\Textarea::make('notes')
                             ->label('Notes')

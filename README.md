@@ -24,15 +24,7 @@ composer require notwonderful/filament-cloudflare
 php artisan vendor:publish --tag=cloudflare-config
 ```
 
-### 3. Run migrations
-
-The package stores encrypted credentials in the database as a fallback when `.env` values are not set.
-
-```bash
-php artisan migrate
-```
-
-### 4. Set Cloudflare credentials
+### 3. Set Cloudflare credentials
 
 Add to your `.env` file:
 
@@ -49,9 +41,7 @@ CLOUDFLARE_ZONE_ID=your_zone_id
 CLOUDFLARE_ACCOUNT_ID=your_account_id
 ```
 
-Credentials can also be managed from the Filament Settings page (stored encrypted in the database). `.env` values take priority.
-
-### 5. Register the plugin
+### 4. Register the plugin
 
 In your Filament panel provider:
 

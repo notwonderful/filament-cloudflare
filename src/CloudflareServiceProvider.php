@@ -17,15 +17,10 @@ class CloudflareServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament-cloudflare');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $this->publishes([
             __DIR__ . '/../config/cloudflare.php' => config_path('cloudflare.php'),
         ], 'cloudflare-config');
-
-        $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations/vendor/filament-cloudflare'),
-        ], 'cloudflare-migrations');
     }
 
     public function register(): void

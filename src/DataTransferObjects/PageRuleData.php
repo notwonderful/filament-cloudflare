@@ -32,7 +32,9 @@ final readonly class PageRuleData
             targets: $targets,
             actions: $actions,
             priority: (int) ($data['priority'] ?? 1),
-            status: isset($data['status']) ? PageRuleStatus::from($data['status']) : PageRuleStatus::Active,
+            status: isset($data['status'])
+                ? ($data['status'] instanceof PageRuleStatus ? $data['status'] : PageRuleStatus::from($data['status']))
+                : PageRuleStatus::Active,
         );
     }
 

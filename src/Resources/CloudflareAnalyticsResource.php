@@ -32,7 +32,7 @@ class CloudflareAnalyticsResource extends Resource
                             ->options(AnalyticsDaysRange::options())
                             ->default((string) AnalyticsDaysRange::default()->value)
                             ->required()
-                            ->saved(false),
+                            ->dehydrated(false),
                     ]),
             ]);
     }

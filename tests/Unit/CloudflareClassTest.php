@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use notwonderful\FilamentCloudflare\Cloudflare;
+use notwonderful\FilamentCloudflare\CloudflareServiceProvider;
 use notwonderful\FilamentCloudflare\Contracts\CloudflareAuthInterface;
 use notwonderful\FilamentCloudflare\Contracts\CloudflareClientInterface;
 use notwonderful\FilamentCloudflare\Contracts\CloudflareSettingsInterface;
-use notwonderful\FilamentCloudflare\Exceptions\CloudflareApiException;
 use notwonderful\FilamentCloudflare\Exceptions\CloudflareException;
 use notwonderful\FilamentCloudflare\Http\CloudflareResponse;
 use notwonderful\FilamentCloudflare\Services\Cache\CloudflareCacheService;
@@ -24,8 +23,6 @@ use Psr\Http\Message\StreamInterface;
 
 class CloudflareClassTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function tearDown(): void
     {
         Mockery::close();
@@ -35,7 +32,7 @@ class CloudflareClassTest extends TestCase
     protected function getPackageProviders($app): array
     {
         return [
-            \notwonderful\FilamentCloudflare\CloudflareServiceProvider::class,
+            CloudflareServiceProvider::class,
         ];
     }
 

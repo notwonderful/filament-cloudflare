@@ -39,34 +39,22 @@ class CloudflareSettings extends Page
 
     public function mount(): void
     {
-        $settings = Cloudflare::settings()->getAll();
+        $formData = [];
 
-        $formData = [
-            'cloudflare_email' => $settings['email'] ?? null,
-            'cloudflare_api_key' => $settings['api_key'] ?? null,
-            'cloudflare_token' => $settings['token'] ?? null,
-            'cloudflare_zone_id' => $settings['zone_id'] ?? null,
-            'cloudflare_account_id' => $settings['account_id'] ?? null,
-        ];
+        $zoneId = Cloudflare::getZoneId();
 
-        try {
-            $zoneId = $formData['cloudflare_zone_id'];
+        if ($zoneId) {
+            $zoneSettingsResponse = Cloudflare::zone()->getZoneSettings($zoneId);
+            $zoneSettings = ZoneSettingsData::fromApiResponse($zoneSettingsResponse);
 
-            if ($zoneId) {
-                $zoneSettingsResponse = Cloudflare::zone()->getZoneSettings($zoneId);
-                $zoneSettings = ZoneSettingsData::fromApiResponse($zoneSettingsResponse);
-
-                $formData = array_merge($formData, [
-                    'security_level' => $zoneSettings->securityLevel,
-                    'ssl' => $zoneSettings->ssl,
-                    'always_use_https' => $zoneSettings->alwaysUseHttps ?? false,
-                    'automatic_https_rewrites' => $zoneSettings->automaticHttpsRewrites ?? false,
-                    'browser_check' => $zoneSettings->browserCheck ?? false,
-                    'min_tls_version' => $zoneSettings->minTlsVersion,
-                ]);
-            }
-        } catch (CloudflareException $e) {
-            Log::warning('Failed to load Cloudflare zone settings', ['error' => $e->getMessage()]);
+            $formData = [
+                'security_level' => $zoneSettings->securityLevel,
+                'ssl' => $zoneSettings->ssl,
+                'always_use_https' => $zoneSettings->alwaysUseHttps ?? false,
+                'automatic_https_rewrites' => $zoneSettings->automaticHttpsRewrites ?? false,
+                'browser_check' => $zoneSettings->browserCheck ?? false,
+                'min_tls_version' => $zoneSettings->minTlsVersion,
+            ];
         }
 
         $this->data = $formData;
@@ -78,45 +66,8 @@ class CloudflareSettings extends Page
         return $schema
             ->statePath('data')
             ->schema([
-                Section::make('Authentication')
-                    ->description('Configure your Cloudflare API credentials')
-                    ->schema([
-                        Forms\Components\TextInput::make('cloudflare_email')
-                            ->label('Email')
-                            ->email()
-                            ->required()
-                            ->dehydrated()
-                            ->helperText('Your Cloudflare account email address'),
-
-                        Forms\Components\TextInput::make('cloudflare_api_key')
-                            ->label('API Key')
-                            ->password()
-                            ->required()
-                            ->dehydrated()
-                            ->helperText('Your Cloudflare Global API Key'),
-
-                        Forms\Components\TextInput::make('cloudflare_token')
-                            ->label('API Token')
-                            ->password()
-                            ->dehydrated()
-                            ->helperText('API Token is recommended for better security and granular permissions'),
-
-                        Forms\Components\TextInput::make('cloudflare_zone_id')
-                            ->label('Zone ID')
-                            ->required()
-                            ->dehydrated()
-                            ->live(onBlur: true)
-                            ->helperText('The Zone ID for your Cloudflare zone'),
-
-                        Forms\Components\TextInput::make('cloudflare_account_id')
-                            ->label('Account ID')
-                            ->dehydrated()
-                            ->helperText('Your Cloudflare account ID (optional)'),
-                    ])
-                    ->columns(2),
-
                 Section::make('Zone Settings')
-                    ->description('Manage your Cloudflare zone settings')
+                    ->description('Manage your Cloudflare zone settings. Credentials are configured via .env file.')
                     ->schema([
                         Forms\Components\Select::make('security_level')
                             ->label('Security Level')
@@ -162,18 +113,14 @@ class CloudflareSettings extends Page
                 return;
             }
 
-            Cloudflare::settings()->setAll([
-                'email' => $data['cloudflare_email'] ?? null,
-                'api_key' => $data['cloudflare_api_key'] ?? null,
-                'token' => $data['cloudflare_token'] ?? null,
-                'zone_id' => $data['cloudflare_zone_id'] ?? null,
-                'account_id' => $data['cloudflare_account_id'] ?? null,
-            ]);
-
-            $zoneId = $data['cloudflare_zone_id'] ?? null;
+            $zoneId = Cloudflare::getZoneId();
 
             if (! $zoneId) {
-                Notification::make()->title('Zone ID is required')->danger()->send();
+                Notification::make()
+                    ->title('Zone ID is not configured')
+                    ->body('Set CLOUDFLARE_ZONE_ID in your .env file.')
+                    ->danger()
+                    ->send();
                 return;
             }
 
@@ -221,9 +168,7 @@ class CloudflareSettings extends Page
                 ->action(function () {
                     try {
                         $this->mount();
-                        $this->form->fill($this->data);
                         Notification::make()->title('Settings refreshed from Cloudflare')->success()->send();
-                        $this->dispatch('$refresh');
                     } catch (CloudflareException $e) {
                         Notification::make()->title('Error: ' . $e->getMessage())->danger()->send();
                     }
@@ -251,7 +196,7 @@ class CloudflareSettings extends Page
                 ->action(function () {
                     try {
                         $zones = Cloudflare::zone()->listZones();
-                        Notification::make()->title('Found ' . count($zones)  . ' zones')->success()->send();
+                        Notification::make()->title('Found ' . count($zones) . ' zones')->success()->send();
                     } catch (CloudflareException $e) {
                         Notification::make()->title('Error: ' . $e->getMessage())->danger()->send();
                     }

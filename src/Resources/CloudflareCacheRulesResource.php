@@ -124,7 +124,7 @@ class CloudflareCacheRulesResource extends Resource
 
                 Tables\Columns\TextColumn::make('action_parameters')
                     ->label('Cache Settings')
-                    ->formatStateUsing(fn (array $state): string => self::formatActionParameters($state))
+                    ->formatStateUsing(fn (mixed $state): string => is_array($state) ? self::formatActionParameters($state) : '-')
                     ->limit(100)
                     ->wrap(),
 

@@ -13,6 +13,7 @@ use notwonderful\FilamentCloudflare\Pages\CloudflareSettings;
 use notwonderful\FilamentCloudflare\Resources\CloudflareAccessResource;
 use notwonderful\FilamentCloudflare\Resources\CloudflareAnalyticsResource;
 use notwonderful\FilamentCloudflare\Resources\CloudflareCacheRulesResource;
+use notwonderful\FilamentCloudflare\Resources\CloudflareDnsResource;
 use notwonderful\FilamentCloudflare\Resources\CloudflareFirewallResource;
 use notwonderful\FilamentCloudflare\Resources\CloudflarePageRulesResource;
 use notwonderful\FilamentCloudflare\Resources\CloudflareAnalyticsResource\Widgets;
@@ -46,6 +47,7 @@ class CloudflarePlugin implements Plugin
                 CloudflareEdgeCaching::class,
             ])
             ->resources([
+                CloudflareDnsResource::class,
                 CloudflareFirewallResource::class,
                 CloudflareUserAgentRulesResource::class,
                 CloudflareCacheRulesResource::class,

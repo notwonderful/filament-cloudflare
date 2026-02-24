@@ -59,6 +59,7 @@ public function panel(Panel $panel): Panel
 
 | Feature | Description |
 |---|---|
+| **DNS Records** | Full CRUD for A, AAAA, CNAME, MX, TXT, NS, SRV, CAA records. Proxy toggle, export BIND file |
 | **Zone Settings** | View and edit SSL mode, security level, HTTPS enforcement, browser integrity check, and more |
 | **Firewall Access Rules** | Block, challenge, or whitelist IPs, IP ranges, and countries |
 | **User Agent Rules** | Block or challenge requests by user agent string |
@@ -74,6 +75,7 @@ public function panel(Panel $panel): Panel
 
 ### Supported
 
+- [x] DNS Records management — CRUD (`zones/{id}/dns_records`)
 - [x] Zone Settings — read & edit (`zones/{id}/settings`)
 - [x] Zone Details — list & read (`zones`, `zones/{id}`)
 - [x] Firewall Access Rules — CRUD (`zones/{id}/firewall/access_rules/rules`)
@@ -90,7 +92,6 @@ public function panel(Panel $panel): Panel
 
 ### Not Supported
 
-- [ ] DNS Records management
 - [ ] SSL/TLS Certificate management
 - [ ] Workers / Workers Routes
 - [ ] Load Balancing
@@ -112,6 +113,7 @@ When creating a Cloudflare API Token, assign these permissions:
 
 | Scope | Permission | Level |
 |---|---|---|
+| Zone | DNS | Read, Edit |
 | Zone | Zone Settings | Read, Edit |
 | Zone | Zone | Read |
 | Zone | Firewall Services | Edit |

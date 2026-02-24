@@ -10,6 +10,7 @@ use notwonderful\FilamentCloudflare\Services\Access\CloudflareAccessService;
 use notwonderful\FilamentCloudflare\Services\Analytics\CloudflareAnalyticsService;
 use notwonderful\FilamentCloudflare\Services\Cache\CloudflareCacheService;
 use notwonderful\FilamentCloudflare\Services\CacheRules\CloudflareCacheRulesService;
+use notwonderful\FilamentCloudflare\Services\Dns\CloudflareDnsService;
 use notwonderful\FilamentCloudflare\Services\EdgeCaching\CloudflareEdgeCachingService;
 use notwonderful\FilamentCloudflare\Services\Firewall\CloudflareFirewallService;
 use notwonderful\FilamentCloudflare\Services\PageRules\CloudflarePageRulesService;
@@ -18,6 +19,7 @@ use notwonderful\FilamentCloudflare\Services\Zone\CloudflareZoneService;
 /**
  * @method static CloudflareZoneService zone()
  * @method static CloudflareCacheService cache()
+ * @method static CloudflareDnsService dns()
  * @method static CloudflareFirewallService firewall()
  * @method static CloudflareCacheRulesService cacheRules()
  * @method static CloudflarePageRulesService pageRules()

@@ -14,6 +14,7 @@ use notwonderful\FilamentCloudflare\Exceptions\CloudflareException;
 use notwonderful\FilamentCloudflare\Http\CloudflareResponse;
 use notwonderful\FilamentCloudflare\Services\Cache\CloudflareCacheService;
 use notwonderful\FilamentCloudflare\Services\CacheRules\CloudflareCacheRulesService;
+use notwonderful\FilamentCloudflare\Services\Dns\CloudflareDnsService;
 use notwonderful\FilamentCloudflare\Services\Firewall\CloudflareFirewallService;
 use notwonderful\FilamentCloudflare\Services\PageRules\CloudflarePageRulesService;
 use notwonderful\FilamentCloudflare\Services\Zone\CloudflareZoneService;
@@ -223,5 +224,14 @@ class CloudflareClassTest extends TestCase
 
         $this->assertInstanceOf(CloudflarePageRulesService::class, $service);
         $this->assertSame($service, $cf->pageRules());
+    }
+
+    public function test_dns_returns_dns_service_instance(): void
+    {
+        $cf = $this->createCloudflare();
+        $service = $cf->dns();
+
+        $this->assertInstanceOf(CloudflareDnsService::class, $service);
+        $this->assertSame($service, $cf->dns());
     }
 }

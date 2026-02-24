@@ -13,6 +13,7 @@ use notwonderful\FilamentCloudflare\Services\Access\CloudflareAccessService;
 use notwonderful\FilamentCloudflare\Services\Analytics\CloudflareAnalyticsService;
 use notwonderful\FilamentCloudflare\Services\Cache\CloudflareCacheService;
 use notwonderful\FilamentCloudflare\Services\CacheRules\CloudflareCacheRulesService;
+use notwonderful\FilamentCloudflare\Services\Dns\CloudflareDnsService;
 use notwonderful\FilamentCloudflare\Services\EdgeCaching\CloudflareEdgeCachingService;
 use notwonderful\FilamentCloudflare\Services\Firewall\CloudflareFirewallService;
 use notwonderful\FilamentCloudflare\Services\GraphQL\CloudflareGraphQLService;
@@ -23,6 +24,7 @@ class Cloudflare
 {
     private ?CloudflareZoneService $zoneService = null;
     private ?CloudflareCacheService $cacheService = null;
+    private ?CloudflareDnsService $dnsService = null;
     private ?CloudflareFirewallService $firewallService = null;
     private ?CloudflareCacheRulesService $cacheRulesService = null;
     private ?CloudflarePageRulesService $pageRulesService = null;
@@ -44,6 +46,11 @@ class Cloudflare
     public function cache(): CloudflareCacheService
     {
         return $this->cacheService ??= new CloudflareCacheService($this->client, $this->settings);
+    }
+
+    public function dns(): CloudflareDnsService
+    {
+        return $this->dnsService ??= new CloudflareDnsService($this->client, $this->settings);
     }
 
     public function firewall(): CloudflareFirewallService
